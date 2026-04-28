@@ -2,50 +2,53 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Planner</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>João & Catarina Planner</title>
 
-  <link rel="manifest" href="/manifest.json" />
-  <meta name="theme-color" content="#6a11cb" />
+  <!-- PWA -->
+  <link rel="manifest" href="/joao-catarina-planner/manifest.json">
+  <meta name="theme-color" content="#6a11cb">
 
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; padding: 40px; }
-    a { display: block; margin: 15px; font-size: 20px; }
-    button { padding: 12px 20px; margin-top: 20px; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      text-align: center;
+      padding: 40px;
+    }
+    a {
+      display: block;
+      margin: 20px;
+      font-size: 22px;
+      text-decoration: none;
+      color: #0078d4;
+    }
+    button {
+      padding: 12px 20px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: none;
+      background: #6a11cb;
+      color: white;
+      margin-top: 30px;
+    }
   </style>
 </head>
 <body>
 
   <h1>João & Catarina Planner</h1>
 
-  <calendar.html📅 Calendar</a>
-  <shopping-list.html🛒 Shopping List</a>
+  <a href="/joao-catarina-planner/calendar.html">📅 Calendar</a>
+  <a href="/joao-catarina-planner/shopping-list.html">🛒 Shopping List</a>
 
   <button id="installBtn" hidden>Install App</button>
 
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js
-
-  <script>
-    const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "shared-joao-catarina.firebaseapp.com",
-      databaseURL: "https://shared-joao-catarina-default-rtdb.europe-west1.firebasedatabase.app/",
-      projectId: "shared-joao-catarina",
-      messagingSenderId: "YOUR_SENDER_ID",
-      appId: "YOUR_APP_ID"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-  </script>
-
-  <!-- Install button logic -->
+  <!-- Install button logic (Android) -->
   <script>
     let deferredPrompt;
     const btn = document.getElementById("installBtn");
 
-    window.addEventListener("beforeinstallprompt", e => {
+    window.addEventListener("beforeinstallprompt", (e) => {
       e.preventDefault();
       deferredPrompt = e;
       btn.hidden = false;
@@ -58,7 +61,7 @@
     });
   </script>
 
-  <!-- Service worker -->
+  <!-- Service Worker -->
   <script>
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/joao-catarina-planner/service-worker.js");
