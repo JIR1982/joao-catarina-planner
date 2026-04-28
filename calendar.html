@@ -1,85 +1,92 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Calendar</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shared Calendar</title>
 
-<link rel="manifest" href="/joao-catarina-planner/manifest.json">
-<meta name="theme-color" content="#6a11cb">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      padding: 16px;
+    }
 
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    background: #f4f4f4;
-    padding: 16px;
-  }
+    h2 {
+      text-align: center;
+      margin-bottom: 10px;
+    }
 
-  h2 { text-align: center; }
+    #header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
 
-  #header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-  }
+    #monthLabel {
+      font-weight: bold;
+      font-size: 18px;
+    }
 
-  #calendar {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 6px;
-  }
+    #calendar {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+    }
 
-  .weekday {
-    text-align: center;
-    font-weight: bold;
-  }
+    .weekday {
+      text-align: center;
+      font-weight: bold;
+    }
 
-  .day {
-    background: white;
-    min-height: 100px;
-    padding: 6px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 12px;
-    position: relative;
-  }
+    .day {
+      background: white;
+      min-height: 100px;
+      padding: 6px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+    }
 
-  .day.weekend { background: #f0f0f0; }
+    .day.weekend {
+      background: #eeeeee;
+    }
 
-  .day.today {
-    border: 2px solid #6a11cb;
-  }
+    .day.today {
+      border: 2px solid #6a11cb;
+    }
 
-  .date {
-    font-weight: bold;
-    margin-bottom: 6px;
-  }
+    .date {
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
 
-  .event {
-    background: #6a11cb;
-    color: white;
-    padding: 3px 5px;
-    border-radius: 4px;
-    margin-bottom: 3px;
-    font-size: 11px;
-  }
+    .event {
+      background: #6a11cb;
+      color: white;
+      padding: 3px 5px;
+      border-radius: 4px;
+      font-size: 11px;
+      margin-bottom: 3px;
+    }
 
-  .event:hover {
-    opacity: 0.9;
-  }
+    .event:hover {
+      opacity: 0.9;
+    }
 
-  a {
-    display: block;
-    text-align: center;
-    margin-top: 16px;
-  }
-</style>
+    a {
+      display: block;
+      text-align: center;
+      margin-top: 16px;
+      text-decoration: none;
+      color: #0078d4;
+    }
+  </style>
 </head>
-
 <body>
 
-<h2>Shared Calendar</h2>
+<h2>Shared Monthly Calendar</h2>
 
 <div id="header">
   <button id="prev">◀</button>
@@ -89,38 +96,55 @@
 
 <div id="calendar"></div>
 
-<a href="/joao-catarina-planner/index.html">⬅ Back</a>
+<a href="./index.html">⬅ Back</a>
 
+<!-- ✅ Firebase (correct, clean scripts) -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyCcdM3IhHEnTy9WR4wAaJkbKA_2BcqPqCw",
-  authDomain: "shared-joao-catarina.firebaseapp.com",
-  databaseURL: "https://shared-joao-catarina-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "shared-joao-catarina",
-  storageBucket: "shared-joao-catarina.firebasestorage.app",
-  messagingSenderId: "113531041537",
-  appId: "1:113531041537:web:084fd323fa900295c4cd00"
-};
+  // ✅ Firebase config (yours)
+  const firebaseConfig = {
+    apiKey: "AIzaSyCcdM3IhHEnTy9WR4wAaJkbKA_2BcqPqCw",
+    authDomain: "shared-joao-catarina.firebaseapp.com",
+    databaseURL: "https://shared-joao-catarina-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "shared-joao-catarina",
+    storageBucket: "shared-joao-catarina.firebasestorage.app",
+    messagingSenderId: "113531041537",
+    appId: "1:113531041537:web:084fd323fa900295c4cd00"
+  };
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-const eventsRef = db.ref("calendarEvents");
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+  const eventsRef = db.ref("calendarEvents");
 
-let current = new Date();
-let events = {};
+  let current = new Date();
+  let events = {};
 
-eventsRef.on("value", snap => {
-  events = snap.val() || {};
-  render();
-});
+  eventsRef.on("value", snap => {
+    events = snap.val() || {};
+    renderCalendar();
+  });
 
-function render() {
-  const cal = document.getElementById("calendar");
-  cal.innerHTML = "";
+  function renderCalendar() {
+    const cal = document.getElementById("calendar");
+    cal.innerHTML = "";
 
-  const y = current.getFullYear();
-  const m = current.getMonth();
+    const year = current.getFullYear();
+    const month = current.getMonth();
+
+    document.getElementById("monthLabel").textContent =
+      current.toLocaleString("default", { month: "long", year: "numeric" });
+
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const todayKey = new Date().toISOString().split("T")[0];
+
+    const weekdays = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+    weekdays.forEach(d => {
+      const el = document.createElement("div");
+      el.className = "weekday";
+      el.textContent = d;
+      cal.appendChild(el);
+    });
 
