@@ -36,28 +36,27 @@
     position:relative;
   }
 
-  .day.other-month { opacity:0.3; }
   .day.today { border:2px solid #6a11cb; }
   .day.selected { background:#eaeaff; }
 
-  .day-number { font-weight:bold; }
-
-  .task-indicator {
-    display:flex;
-    margin-top:4px;
-    gap:3px;
+  .day-number {
+    font-weight:bold;
+    font-size:14px;
   }
 
   .task-dot {
     width:8px;
     height:8px;
     border-radius:50%;
+    margin-top:4px;
+    display:inline-block;
+    margin-right:2px;
   }
 
   #tasks {
     margin-top:16px;
     background:white;
-    padding:10px;
+    padding:12px;
     border-radius:8px;
   }
 
@@ -67,13 +66,24 @@
     margin-bottom:8px;
   }
 
+  .task-time { font-weight:bold; }
+
   .delete-btn {
     background:red;
     color:white;
     border:none;
     padding:4px 6px;
     cursor:pointer;
+    margin-top:4px;
   }
+
+  input, select {
+    width:100%;
+    margin-top:6px;
+    padding:6px;
+  }
+
+  button { margin-top:8px; }
 </style>
 </head>
 
@@ -89,8 +99,9 @@
 <div id="calendar"></div>
 
 <div id="tasks">
-  <div id="selected-date"></div>
+  <strong id="selected-date"></strong>
 
+  <input id="task-time" type="time">
   <input id="task-title" placeholder="Task title">
   <input id="task-description" placeholder="Description">
 
@@ -101,24 +112,23 @@
     <option value="all">All</option>
   </select>
 
-  <button id="add-task">Add Task</button>
+  <button id="save-task">Save Task</button>
 
   <div id="task-list"></div>
 </div>
 
-<!-- ✅ Firebase -->
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <script>
-/* ---------- Firebase setup ---------- */
-const firebaseConfig = {
+/* ---------- Firebase ---------- */
+firebase.initializeApp({
   apiKey: "AIzaSyCcdM3IhHEnTy9WR4wAaJkbKA_2BcqPqCw",
   authDomain: "shared-joao-catarina.firebaseapp.com",
   databaseURL: "https://shared-joao-catarina-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "shared-joao-catarina",
-};
-firebase.initializeApp(firebaseConfig);
+  projectId: "shared-joao-catarina"
+});
 
 const db = firebase.database();
 const tasksRef = db.ref("calendarTasks");
@@ -127,8 +137,10 @@ const tasksRef = db.ref("calendarTasks");
 let currentDate = new Date();
 let selectedDate = new Date();
 let tasks = {};
+let editingIndex = null;
 
-const categoryColors = {
+/* ---------- Colors ---------- */
+const colors = {
   joao:"#6a11cb",
   catarina:"#2575fc",
   kids:"#00b894",
@@ -140,100 +152,58 @@ function formatDate(d){
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
 }
 
-/* ---------- Firebase sync ---------- */
-tasksRef.on("value", snap => {
+/* ---------- Firebase Sync ---------- */
+tasksRef.on("value", snap=>{
   tasks = snap.val() || {};
   renderCalendar();
-  updateTaskList();
+  renderTasks();
 });
 
-/* ---------- Calendar rendering ---------- */
+/* ---------- Calendar ---------- */
 function renderCalendar(){
-  const cal = document.getElementById("calendar");
-  cal.innerHTML = "";
-
+  document.getElementById("calendar").innerHTML = "";
   document.getElementById("current-month-year").textContent =
     currentDate.toLocaleString("en-US",{month:"long",year:"numeric"});
 
-  const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-  days.forEach(d=>{
-    const el=document.createElement("div");
-    el.className="day-header";
-    el.textContent=d;
-    cal.appendChild(el);
+  ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].forEach(d=>{
+    const h=document.createElement("div");
+    h.className="day-header";
+    h.textContent=d;
+    calendar.appendChild(h);
   });
 
-  const first = new Date(currentDate.getFullYear(),currentDate.getMonth(),1);
-  const last = new Date(currentDate.getFullYear(),currentDate.getMonth()+1,0);
+  const first=new Date(currentDate.getFullYear(),currentDate.getMonth(),1);
+  const last=new Date(currentDate.getFullYear(),currentDate.getMonth()+1,0);
 
-  for(let i=0;i<first.getDay();i++){
-    cal.appendChild(document.createElement("div"));
-  }
+  for(let i=0;i<first.getDay();i++) calendar.appendChild(document.createElement("div"));
 
-  for(let d=1; d<=last.getDate(); d++){
+  for(let d=1;d<=last.getDate();d++){
     const date=new Date(currentDate.getFullYear(),currentDate.getMonth(),d);
     const key=formatDate(date);
+    const el=document.createElement("div");
+    el.className="day";
 
-    const box=document.createElement("div");
-    box.className="day";
+    if(formatDate(date)===formatDate(new Date())) el.classList.add("today");
+    if(formatDate(date)===formatDate(selectedDate)) el.classList.add("selected");
 
-    if(formatDate(date)===formatDate(new Date())) box.classList.add("today");
-    if(selectedDate && formatDate(date)===formatDate(selectedDate)) box.classList.add("selected");
-
-    box.innerHTML=`<div class="day-number">${d}</div>`;
+    el.innerHTML=`<div class="day-number">${d}</div>`;
 
     (tasks[key]||[]).forEach(t=>{
-      const dot=document.createElement("div");
+      const dot=document.createElement("span");
       dot.className="task-dot";
-      dot.style.background=categoryColors[t.category];
-      box.appendChild(dot);
+      dot.style.background=colors[t.category];
+      el.appendChild(dot);
     });
 
-    box.onclick=()=>{ selectedDate=date; renderCalendar(); updateTaskList(); };
-    cal.appendChild(box);
+    el.onclick=()=>{ selectedDate=date; editingIndex=null; renderCalendar(); renderTasks(); };
+    calendar.appendChild(el);
   }
 }
 
-/* ---------- Task list ---------- */
-function updateTaskList(){
+/* ---------- Task List ---------- */
+function renderTasks(){
   const list=document.getElementById("task-list");
+  const key=formatDate(selectedDate);
   list.innerHTML="";
-  document.getElementById("selected-date").textContent =
-    selectedDate.toDateString();
+  document.getElementById("selected-date").textContent = selectedDate.toDateString();
 
-  const key=formatDate(selectedDate);
-  (tasks[key]||[]).forEach((t,i)=>{
-    const item=document.createElement("div");
-    item.className="task-item";
-    item.style.borderColor=categoryColors[t.category];
-    item.innerHTML=`<b>${t.title}</b><br>${t.description}<br>`;
-    const del=document.createElement("button");
-    del.className="delete-btn";
-    del.textContent="Delete";
-    del.onclick=()=>{
-      tasks[key].splice(i,1);
-      if(tasks[key].length===0) tasksRef.child(key).remove();
-      else tasksRef.child(key).set(tasks[key]);
-    };
-    item.appendChild(del);
-    list.appendChild(item);
-  });
-}
-
-/* ---------- Add task ---------- */
-document.getElementById("add-task").onclick=()=>{
-  const title=document.getElementById("task-title").value.trim();
-  if(!title) return;
-  const desc=document.getElementById("task-description").value;
-  const cat=document.getElementById("task-category").value;
-  const key=formatDate(selectedDate);
-  tasksRef.child(key).transaction(arr=>{
-    arr=arr||[];
-    arr.push({title,description:desc,category:cat});
-    return arr;
-  });
-};
-</script>
-
-</body>
-</html>
