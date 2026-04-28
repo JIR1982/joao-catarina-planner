@@ -2,68 +2,76 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Shopping List</title>
 
-<link rel="manifest" href="/manifest.json">
+<link rel="manifest" href="/joao-catarina-planner/manifest.json">
 <meta name="theme-color" content="#6a11cb">
-</head>
 
+<style>
+  body { font-family: Arial; padding: 30px; }
+  input, button { padding: 10px; font-size: 16px; }
+  li { cursor: pointer; }
+</style>
+</head>
 <body>
+
 <h2>Shopping List</h2>
 
-<input id="item" placeholder="Item">
-<button>Add</button>
+<input id="itemText" placeholder="Item">
+<button id="addBtn">Add</button>
 
-<ul id="list"></ul>
+<ul id="items"></ul>
 
-index.html⬅ Back</a>
+<p><a href="/joao-catarina-planner/index.html">⬅ Back</a></p>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <script>
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "shared-joao-catarina.firebaseapp.com",
-  databaseURL: "https://shared-joao-catarina-default-rtdb.europe-west1.firebasedatabase.app/",
-  projectId: "shared-joao-catarina",
-};
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "shared-joao-catarina.firebaseapp.com",
+    databaseURL: "https://shared-joao-catarina-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "shared-joao-catarina",
+  };
 
-firebase.initializeApp(firebaseConfig);
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+  const ref = db.ref("shoppingList");
 
-const db = firebase.database();
-const ref = db.ref("shoppingList");
-const ul = document.getElementById("list");
+  const list = document.getElementById("items");
 
-ref.on("value", snap => {
-  ul.innerHTML = "";
-  (snap.val() || []).forEach((i, idx) => {
-    const li = document.createElement("li");
-    li.textContent = i;
-    li.onclick = () => remove(idx);
-    ul.appendChild(li);
+  ref.on("value", snap => {
+    list.innerHTML = "";
+    (snap.val() || []).forEach((item, i) => {
+      const li = document.createElement("li");
+      li.textContent = item;
+      li.onclick = () => removeItem(i);
+      list.appendChild(li);
+    });
   });
-});
 
-function remove(i) {
-  ref.once("value", snap => {
-    const arr = snap.val() || [];
-    arr.splice(i, 1);
-    ref.set(arr);
-  });
-}
+  function removeItem(i) {
+    ref.once("value", snap => {
+      const arr = snap.val() || [];
+      arr.splice(i, 1);
+      ref.set(arr);
+    });
+  }
 
-document.querySelector("button").onclick = () => {
-  const v = item.value.trim();
-  if (!v) return;
-  ref.transaction(arr => (arr || []).concat(v));
-  item.value = "";
-};
+  document.getElementById("addBtn").onclick = () => {
+    const text = itemText.value.trim();
+    if (!text) return;
+    ref.transaction(arr => (arr || []).concat(text));
+    itemText.value = "";
+  };
+</script>
 
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("/joao-catarina-planner/service-worker.js");
-}
+<script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("/joao-catarina-planner/service-worker.js");
+  }
 </script>
 </body>
 </html>
