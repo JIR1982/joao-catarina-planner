@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Calendar Test</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    #calendar {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 5px;
+    }
+    .day {
+      background: #ddd;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<h2>Monthly Calendar TEST</h2>
+
+<div id="calendar"></div>
+
+<script>
+  const cal = document.getElementById("calendar");
+  for (let i = 1; i <= 30; i++) {
+    const d = document.createElement("div");
+    d.className = "day";
+    d.textContent = i;
+    cal.appendChild(d);
+  }
+</script>
+
+</body>
+</html>
