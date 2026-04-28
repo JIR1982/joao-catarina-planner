@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Calendar – Stable Test</title>
+  <title>Shared Calendar</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
@@ -16,52 +16,99 @@
       text-align: center;
     }
 
+    #header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    #monthLabel {
+      font-weight: bold;
+      font-size: 18px;
+    }
+
     #calendar {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
       gap: 6px;
-      margin-top: 12px;
+      margin-top: 10px;
+    }
+
+    .weekday {
+      text-align: center;
+      font-weight: bold;
     }
 
     .day {
       background: white;
+      min-height: 90px;
+      padding: 6px;
       border-radius: 6px;
-      padding: 20px;
-      text-align: center;
       cursor: pointer;
-      font-weight: bold;
+      font-size: 12px;
     }
 
     .day:hover {
       background: #eaeaff;
     }
 
+    .date {
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+
+    .event {
+      background: #6a11cb;
+      color: white;
+      padding: 2px 4px;
+      border-radius: 4px;
+      margin-bottom: 2px;
+      font-size: 11px;
+    }
+
     a {
       display: block;
       text-align: center;
       margin-top: 16px;
+      text-decoration: none;
+      color: #0078d4;
     }
   </style>
 </head>
+
 <body>
 
-<h2>Monthly Calendar (JS Test)</h2>
+<h2>Shared Calendar</h2>
+
+<div id="header">
+  <button id="prev">◀</button>
+  <div id="monthLabel"></div>
+  <button id="next">▶</button>
+</div>
 
 <div id="calendar"></div>
 
-./index.html⬅ Back</a>
+<a href="./index.html">⬅ Back</a>
+
+<!-- ✅ FIREBASE SCRIPTS (CORRECT) -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <script>
-  const cal = document.getElementById("calendar");
+  // 🔐 Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyCcdM3IhHEnTy9WR4wAaJkbKA_2BcqPqCw",
+    authDomain: "shared-joao-catarina.firebaseapp.com",
+    databaseURL: "https://shared-joao-catarina-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "shared-joao-catarina",
+    storageBucket: "shared-joao-catarina.firebasestorage.app",
+    messagingSenderId: "113531041537",
+    appId: "1:113531041537:web:084fd323fa900295c4cd00"
+  };
 
-  for (let i = 1; i <= 31; i++) {
-    const d = document.createElement("div");
-    d.className = "day";
-    d.textContent = i;
-    d.onclick = () => alert("Clicked day " + i);
-    cal.appendChild(d);
-  }
-</script>
+  firebase.initializeApp(firebaseConfig);
 
-</body>
-</html>
+  const db = firebase.database();
+  const eventsRef = db.ref("calendarEvents");
+
+  let currentDate = new Date();
