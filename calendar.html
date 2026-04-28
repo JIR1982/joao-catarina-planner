@@ -1,38 +1,126 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Calendar Test</title>
-  <style>
-    body { font-family: Arial; padding: 20px; }
-    #calendar {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 5px;
-    }
-    .day {
-      background: #ddd;
-      padding: 20px;
-      text-align: center;
-      cursor: pointer;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calendar</title>
+
+<link rel="manifest" href="/joao-catarina-planner/manifest.json">
+<meta name="theme-color" content="#6a11cb">
+
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4;
+    padding: 16px;
+  }
+
+  h2 { text-align: center; }
+
+  #header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  #calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+  }
+
+  .weekday {
+    text-align: center;
+    font-weight: bold;
+  }
+
+  .day {
+    background: white;
+    min-height: 100px;
+    padding: 6px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    position: relative;
+  }
+
+  .day.weekend { background: #f0f0f0; }
+
+  .day.today {
+    border: 2px solid #6a11cb;
+  }
+
+  .date {
+    font-weight: bold;
+    margin-bottom: 6px;
+  }
+
+  .event {
+    background: #6a11cb;
+    color: white;
+    padding: 3px 5px;
+    border-radius: 4px;
+    margin-bottom: 3px;
+    font-size: 11px;
+  }
+
+  .event:hover {
+    opacity: 0.9;
+  }
+
+  a {
+    display: block;
+    text-align: center;
+    margin-top: 16px;
+  }
+</style>
 </head>
+
 <body>
 
-<h2>Monthly Calendar TEST</h2>
+<h2>Shared Calendar</h2>
+
+<div id="header">
+  <button id="prev">◀</button>
+  <div id="monthLabel"></div>
+  <button id="next">▶</button>
+</div>
 
 <div id="calendar"></div>
 
-<script>
-  const cal = document.getElementById("calendar");
-  for (let i = 1; i <= 30; i++) {
-    const d = document.createElement("div");
-    d.className = "day";
-    d.textContent = i;
-    cal.appendChild(d);
-  }
-</script>
+<a href="/joao-catarina-planner/index.html">⬅ Back</a>
 
-</body>
-</html>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCcdM3IhHEnTy9WR4wAaJkbKA_2BcqPqCw",
+  authDomain: "shared-joao-catarina.firebaseapp.com",
+  databaseURL: "https://shared-joao-catarina-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "shared-joao-catarina",
+  storageBucket: "shared-joao-catarina.firebasestorage.app",
+  messagingSenderId: "113531041537",
+  appId: "1:113531041537:web:084fd323fa900295c4cd00"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const eventsRef = db.ref("calendarEvents");
+
+let current = new Date();
+let events = {};
+
+eventsRef.on("value", snap => {
+  events = snap.val() || {};
+  render();
+});
+
+function render() {
+  const cal = document.getElementById("calendar");
+  cal.innerHTML = "";
+
+  const y = current.getFullYear();
+  const m = current.getMonth();
+
