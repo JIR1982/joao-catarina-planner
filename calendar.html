@@ -24,22 +24,24 @@
 
 <p><a href="/joao-catarina-planner/index.html">⬅ Back</a></p>
 
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <script>
   const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
+    apiKey: "AIzaSyCcdM3IhHEnTy9WR4wAaJkbKA_2BcqPqCw",
     authDomain: "shared-joao-catarina.firebaseapp.com",
     databaseURL: "https://shared-joao-catarina-default-rtdb.europe-west1.firebasedatabase.app",
     projectId: "shared-joao-catarina",
+    storageBucket: "shared-joao-catarina.firebasestorage.app",
+    messagingSenderId: "113531041537",
+    appId: "1:113531041537:web:084fd323fa900295c4cd00"
   };
 
   firebase.initializeApp(firebaseConfig);
+
   const db = firebase.database();
   const ref = db.ref("calendarEvents");
-
   const list = document.getElementById("events");
 
   ref.on("value", snap => {
@@ -54,7 +56,6 @@
   document.getElementById("addBtn").onclick = () => {
     const text = eventText.value.trim();
     if (!text) return;
-
     ref.transaction(arr => (arr || []).concat(text));
     eventText.value = "";
   };
@@ -65,5 +66,6 @@
     navigator.serviceWorker.register("/joao-catarina-planner/service-worker.js");
   }
 </script>
+
 </body>
 </html>
