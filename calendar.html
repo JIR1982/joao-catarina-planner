@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calendar</title>
+
+  <catarina-planner/manifest.json
+  <meta name="theme-color" content="#6a11cb">
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      padding: 16px;
+    }
+
+    h2 { text-align: center; }
+
+    #header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    #calendar {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+    }
+
+    .weekday {
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .day {
+      background: white;
+      min-height: 90px;
+      padding: 6px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .day:hover { background: #eaeaff; }
+
+    .date { font-weight: bold; margin-bottom: 4px; }
+
+    .event {
+      background: #6a11cb;
+      color: white;
+      padding: 2px 4px;
+      border-radius: 4px;
+      margin-bottom: 3px;
+      font-size: 11px;
+    }
+
+    a { display: block; text-align: center; margin-top: 16px; }
+  </style>
+</head>
+
+<body>
+
+<h2>Shared Calendar</h2>
+
+<div id="header">
+  <button id="prev">◀</button>
+  <div id="monthLabel"></div>
+  <button id="next">▶</button>
+</div>
+
+<div id="calendar"></div>
+
+<a href="/joao-catarinaindex.html⬅ Back</a>
+
+<!-- ✅ CORRECT Firebase scripts -->
+<script src="https://www.gstatic.com.23.0/firebase-app-compat.js
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.jscript>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCcdM3IhHEnTy9WR4wAaJkbKA_2BcqPqCw",
+    authDomain: "shared-joao-catarina.firebaseapp.com",
+    databaseURL: "https://shared-joao-catarina-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "shared-joao-catarina",
+    storageBucket: "shared-joao-catarina.firebasestorage.app",
+    messagingSenderId: "113531041537",
+    appId: "1:113531041537:web:084fd323fa900295c4cd00"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+  const eventsRef = db.ref("calendarEvents");
+
+  let current = new Date();
+  let events = {};
+
+  eventsRef.on("value", snap => {
+    events = snap.val() || {};
+    render();
+  });
+
+  function render() {
+    const cal = document.getElementById("calendar");
+    cal.innerHTML = "";
+
+    const y = current.getFullYear();
+    const m = current.getMonth();
+
+    document.getElementById("monthLabel").textContent =
+      current.toLocaleString("default", { month: "long", year: "numeric" });
+
+    const first = new Date(y, m, 1).getDay();
+    const days = new Date(y, m + 1, 0).getDate();
+
+    ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].forEach(d => {
+      const el = document.createElement("div");
+      el.className = "weekday";
+      el.textContent = d;
+      cal.appendChild(el);
+    });
+
+    for (let i = 0; i < first; i++) cal.appendChild(document.createElement("div"));
+
+    for (let day = 1; day <= days; day++) {
+      const key = `${y}-${String(m+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+
+      const box = document.createElement("div");
+      box.className = "day";
+      box.innerHTML = `<div class="date">${day}</div>`;
+
+      (events[key] || []).forEach(e => {
+        const ev = document.createElement("div");
+        ev.className = "event";
+        ev.textContent = e;
+        box.appendChild(ev);
+      });
+
+      box.onclick = () => {
+        const text = prompt("Add event");
+        if (!text) return;
+        eventsRef.child(key).transaction(arr => (arr || []).concat(text));
+      };
+
+      cal.appendChild(box);
+    }
+  }
+
+  document.getElementById("prev").onclick = () => {
+    current.setMonth(current.getMonth() - 1);
+    render();
+  };
+
+  document.getElementById("next").onclick = () => {
+    current.setMonth(current.getMonth() + 1);
+    render();
+  };
+</script>
+
+</body>
+</html>
