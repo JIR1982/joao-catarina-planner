@@ -1,7 +1,67 @@
-
 <!DOCTYPE html>
-<html>
-  <body style="background:red;color:white;font-size:40px;text-align:center;">
-    THIS IS THE REAL CALENDAR FILE – TEST 999
-  </body>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Calendar – Stable Test</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      padding: 16px;
+    }
+
+    h2 {
+      text-align: center;
+    }
+
+    #calendar {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      margin-top: 12px;
+    }
+
+    .day {
+      background: white;
+      border-radius: 6px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .day:hover {
+      background: #eaeaff;
+    }
+
+    a {
+      display: block;
+      text-align: center;
+      margin-top: 16px;
+    }
+  </style>
+</head>
+<body>
+
+<h2>Monthly Calendar (JS Test)</h2>
+
+<div id="calendar"></div>
+
+./index.html⬅ Back</a>
+
+<script>
+  const cal = document.getElementById("calendar");
+
+  for (let i = 1; i <= 31; i++) {
+    const d = document.createElement("div");
+    d.className = "day";
+    d.textContent = i;
+    d.onclick = () => alert("Clicked day " + i);
+    cal.appendChild(d);
+  }
+</script>
+
+</body>
 </html>
