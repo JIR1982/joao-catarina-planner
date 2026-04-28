@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calendar</title>
+
+<link rel="manifest" href="/joao-catarina-plannertheme-color" content="#6a11cb">
+
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    padding: 16px;
+    background: #f4f4f4;
+  }
+
+  h2 {
+    text-align: center;
+  }
+
+  #header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  #calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+  }
+
+  .weekday {
+    font-weight: bold;
+    text-align: center;
+  }
+
+  .day {
+    background: white;
+    min-height: 90px;
+    padding: 6px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  .day:hover {
+    background: #e8e8ff;
+  }
+
+  .date {
+    font-weight: bold;
+    margin-bottom: 4px;
+  }
+
+  .event {
+    background: #6a11cb;
+    color: white;
+    padding: 2px 4px;
+    border-radius: 4px;
+    margin-bottom: 3px;
+    font-size: 11px;
+  }
+
+  a {
+    display: block;
+    margin-top: 16px;
+    text-align: center;
+  }
+</style>
+</head>
+
+<body>
+
+<h2>Shared Calendar</h2>
+
+<div id="header">
+  <button onclick="changeMonth(-1)">◀</button>
+  <div id="monthLabel"></div>
+  <button onclick="changeMonth(1)">▶</button>
+</div>
+
+<div id="calendar"></div>
+
+<a href="/joao-planner/index.html⬅ Back</a>
+
+<!-- ✅ FIREBASE (CORRECT SCRIPT TAGS) -->
+<script src="https://www.gstatic.com/firebasejs/9e-app-compat.js
+<script src="https://www.gstatic.com/firebasejs/9.23atabase-compat.js
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCcdM3IhHEnTy9WR4wAaJkbKA_2BcqPqCw",
+  authDomain: "shared-joao-catarina.firebaseapp.com",
+  databaseURL: "https://shared-joao-catarina-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "shared-joao-catarina",
+  storageBucket: "shared-joao-catarina.firebasestorage.app",
+  messagingSenderId: "113531041537",
+  appId: "1:113531041537:web:084fd323fa900295c4cd00"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const eventsRef = db.ref("calendarEvents");
+
+let currentDate = new Date();
+let events = {};
+
+eventsRef.on("value", snap => {
+  events = snap.val() || {};
+  renderCalendar();
+});
+
+function renderCalendar() {
+  const calendar = document.getElementById("calendar");
+  calendar.innerHTML = "";
+
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
+
+  document.getElementById("monthLabel").textContent =
+    currentDate.toLocaleString("default", { month: "long", year: "numeric" });
+
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  const weekdays = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  weekdays.forEach(d => {
+    const w = document.createElement("div");
+    w.className = "weekday";
+    w.textContent = d;
+    calendar.appendChild(w);
+  });
+
+  for (let i = 0; i < firstDay; i++) {
+    calendar.appendChild(document.createElement("div"));
+  }
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dateKey = `${year}-${String(month+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+
+    const box = document.createElement("div");
+    box.className = "day";
+
+    const label = document.createElement("div");
+    label.className = "date";
+    label.textContent = day;
+    box.appendChild(label);
+
+    (events[dateKey] || []).forEach(e => {
+      const ev = document.createElement("div");
+      ev.className = "event";
+      ev.textContent = e;
+      box.appendChild(ev);
+    });
+
+    box.onclick = () => addEvent(dateKey);
+    calendar.appendChild(box);
+  }
+}
+
+function addEvent(dateKey) {
+  const text = prompt("Add event:");
+  if (!text) return;
+
+  eventsRef.child(dateKey).transaction(arr => {
+    if (!arr) return [text];
+    arr.push(text);
+    return arr;
+  });
+}
+
+function changeMonth(delta) {
+  currentDate.setMonth(currentDate.getMonth() + delta);
+  renderCalendar();
+}
+</script>
+
+</body>
+</html>
