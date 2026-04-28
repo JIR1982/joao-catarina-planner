@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Planner</title>
+
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#6a11cb" />
+
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; padding: 40px; }
+    a { display: block; margin: 15px; font-size: 20px; }
+    button { padding: 12px 20px; margin-top: 20px; }
+  </style>
+</head>
+<body>
+
+  <h1>João & Catarina Planner</h1>
+
+  <calendar.html📅 Calendar</a>
+  <shopping-list.html🛒 Shopping List</a>
+
+  <button id="installBtn" hidden>Install App</button>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "shared-joao-catarina.firebaseapp.com",
+      databaseURL: "https://shared-joao-catarina-default-rtdb.europe-west1.firebasedatabase.app/",
+      projectId: "shared-joao-catarina",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+  </script>
+
+  <!-- Install button logic -->
+  <script>
+    let deferredPrompt;
+    const btn = document.getElementById("installBtn");
+
+    window.addEventListener("beforeinstallprompt", e => {
+      e.preventDefault();
+      deferredPrompt = e;
+      btn.hidden = false;
+
+      btn.onclick = () => {
+        deferredPrompt.prompt();
+        deferredPrompt = null;
+        btn.hidden = true;
+      };
+    });
+  </script>
+
+  <!-- Service worker -->
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/service-worker.js");
+    }
+  </script>
+
+</body>
+</html>

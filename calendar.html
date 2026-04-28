@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calendar</title>
+
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#6a11cb">
+</head>
+
+<body>
+<h2>Shared Calendar</h2>
+
+<input id="title" placeholder="Event title">
+<button>Add</button>
+
+<ul id="list"></ul>
+
+index.html⬅ Back</a>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js
+https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js>
+
+<script>
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "shared-joao-catarina.firebaseapp.com",
+  databaseURL: "https://shared-joao-catarina-default-rtdb.europe-west1.firebasedatabase.app/",
+  projectId: "shared-joao-catarina",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const db = firebase.database();
+const auth = firebase.auth();
+const ref = db.ref("calendarEvents");
+const ul = document.getElementById("list");
+
+ref.on("value", snap => {
+  ul.innerHTML = "";
+  const data = snap.val() || [];
+  data.forEach(item => {
+    const li = document.createElement("li");
+    li.textContent = item;
+    ul.appendChild(li);
+  });
+});
+
+document.querySelector("button").onclick = () => {
+  const value = title.value.trim();
+  if (!value) return;
+  ref.transaction(arr => (arr || []).concat(value));
+  title.value = "";
+};
+
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/service-worker.js");
+}
+</script>
+</body>
+</html>

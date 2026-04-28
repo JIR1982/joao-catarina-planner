@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shopping List</title>
+
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#6a11cb">
+</head>
+
+<body>
+<h2>Shopping List</h2>
+
+<input id="item" placeholder="Item">
+<button>Add</button>
+
+<ul id="list"></ul>
+
+index.html⬅ Back</a>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js>
+
+<script>
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "shared-joao-catarina.firebaseapp.com",
+  databaseURL: "https://shared-joao-catarina-default-rtdb.europe-west1.firebasedatabase.app/",
+  projectId: "shared-joao-catarina",
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const db = firebase.database();
+const ref = db.ref("shoppingList");
+const ul = document.getElementById("list");
+
+ref.on("value", snap => {
+  ul.innerHTML = "";
+  (snap.val() || []).forEach((i, idx) => {
+    const li = document.createElement("li");
+    li.textContent = i;
+    li.onclick = () => remove(idx);
+    ul.appendChild(li);
+  });
+});
+
+function remove(i) {
+  ref.once("value", snap => {
+    const arr = snap.val() || [];
+    arr.splice(i, 1);
+    ref.set(arr);
+  });
+}
+
+document.querySelector("button").onclick = () => {
+  const v = item.value.trim();
+  if (!v) return;
+  ref.transaction(arr => (arr || []).concat(v));
+  item.value = "";
+};
+
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/service-worker.js");
+}
+</script>
+</body>
+</html>
