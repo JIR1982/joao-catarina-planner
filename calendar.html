@@ -2,31 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <title>Calendar Test</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Shared Calendar</title>
 
   <style>
     body {
       font-family: Arial, sans-serif;
+      padding: 20px;
       background: #f4f4f4;
-      padding: 16px;
     }
 
     h2 {
       text-align: center;
-      margin-bottom: 10px;
-    }
-
-    #header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-
-    #monthLabel {
-      font-weight: bold;
-      font-size: 18px;
     }
 
     #calendar {
@@ -35,116 +22,35 @@
       gap: 6px;
     }
 
-    .weekday {
-      text-align: center;
-      font-weight: bold;
-    }
-
     .day {
       background: white;
-      min-height: 100px;
-      padding: 6px;
+      padding: 20px;
       border-radius: 6px;
-      cursor: pointer;
-      font-size: 12px;
-    }
-
-    .day.weekend {
-      background: #eeeeee;
-    }
-
-    .day.today {
-      border: 2px solid #6a11cb;
-    }
-
-    .date {
-      font-weight: bold;
-      margin-bottom: 4px;
-    }
-
-    .event {
-      background: #6a11cb;
-      color: white;
-      padding: 3px 5px;
-      border-radius: 4px;
-      font-size: 11px;
-      margin-bottom: 3px;
-    }
-
-    .event:hover {
-      opacity: 0.9;
-    }
-
-    a {
-      display: block;
       text-align: center;
-      margin-top: 16px;
-      text-decoration: none;
-      color: #0078d4;
+      cursor: pointer;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
 
-<h2>Shared Monthly Calendar</h2>
-
-<div id="header">
-  <button id="prev">◀</button>
-  <div id="monthLabel"></div>
-  <button id="next">▶</button>
-</div>
+<h2>Calendar JavaScript Test</h2>
 
 <div id="calendar"></div>
 
-<a href="./index.html">⬅ Back</a>
-
-<!-- ✅ Firebase (correct, clean scripts) -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+./index.html⬅ Back</a>
 
 <script>
-  // ✅ Firebase config (yours)
-  const firebaseConfig = {
-    apiKey: "AIzaSyCcdM3IhHEnTy9WR4wAaJkbKA_2BcqPqCw",
-    authDomain: "shared-joao-catarina.firebaseapp.com",
-    databaseURL: "https://shared-joao-catarina-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "shared-joao-catarina",
-    storageBucket: "shared-joao-catarina.firebasestorage.app",
-    messagingSenderId: "113531041537",
-    appId: "1:113531041537:web:084fd323fa900295c4cd00"
-  };
+  const cal = document.getElementById("calendar");
 
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
-  const eventsRef = db.ref("calendarEvents");
+  for (let i = 1; i <= 31; i++) {
+    const div = document.createElement("div");
+    div.className = "day";
+    div.textContent = i;
+    div.onclick = () => alert("Clicked day " + i);
+    cal.appendChild(div);
+  }
+</script>
 
-  let current = new Date();
-  let events = {};
-
-  eventsRef.on("value", snap => {
-    events = snap.val() || {};
-    renderCalendar();
-  });
-
-  function renderCalendar() {
-    const cal = document.getElementById("calendar");
-    cal.innerHTML = "";
-
-    const year = current.getFullYear();
-    const month = current.getMonth();
-
-    document.getElementById("monthLabel").textContent =
-      current.toLocaleString("default", { month: "long", year: "numeric" });
-
-    const firstDay = new Date(year, month, 1).getDay();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const todayKey = new Date().toISOString().split("T")[0];
-
-    const weekdays = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-    weekdays.forEach(d => {
-      const el = document.createElement("div");
-      el.className = "weekday";
-      el.textContent = d;
-      cal.appendChild(el);
-    });
-
+</body>
+</html>
